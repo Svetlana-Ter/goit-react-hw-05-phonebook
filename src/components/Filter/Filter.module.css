@@ -1,0 +1,19 @@
+.inputBlock {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  font-size: 20px;
+}
+
+.inputField {
+  padding: 5px;
+  font-size: 18px;
+  margin-top: 5px;
+  border: 2px solid black;
+  border-radius: 5px;
+}
+
+.inputField:focus {
+  border: 2px solid blue;
+  outline: none;
+}

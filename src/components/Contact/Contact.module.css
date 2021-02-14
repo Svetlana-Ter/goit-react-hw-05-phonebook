@@ -1,0 +1,21 @@
+.listItem {
+  margin: 10px 0;
+}
+
+.number {
+  display: inline;
+  font-size: 24px;
+  margin: 0 0 0 10px;
+}
+
+.name {
+  display: inline;
+  margin: 5px 0;
+}
+
+.btn {
+  font-size: 18px;
+  margin-left: 10px;
+  padding: 3px 5px;
+  cursor: pointer;
+}
