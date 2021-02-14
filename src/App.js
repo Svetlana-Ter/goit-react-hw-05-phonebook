@@ -4,11 +4,16 @@ import PropTypes from 'prop-types';
 import Form from './components/Form/Form';
 import ContactsList from './components/ContactsList/ContactsList';
 import Filter from './components/Filter/Filter';
+import styles from './App.module.css';
+import { CSSTransition } from 'react-transition-group';
+import Logo from './components/Logo/Logo';
+import Error from './components/Error/Error';
 
 class App extends React.Component {
   static defaultProps = {
     contacts: [],
     filter: '',
+    repeatingName: '',
   };
 
   static propTypes = {
@@ -20,6 +25,7 @@ class App extends React.Component {
       })
     ),
     filter: PropTypes.string,
+    repeatingName: PropTypes.string,
   };
 
   state = {
@@ -42,30 +48,22 @@ class App extends React.Component {
   }
 
   addContact = data => {
-    if (data.name && data.number) {
+    const namesArray = this.state.contacts.map(contact => contact.name);
+    if (namesArray.includes(data.name)) {
+      this.setState({ repeatingName: data.name });
+      setTimeout(() => {
+        this.setState({ repeatingName: '' });
+      }, 3000);
+      return;
+    } else if (data.name && data.number) {
       const contact = {
         id: shortid.generate(),
         name: data.name,
         number: data.number,
       };
-
-      const namesArray = this.state.contacts.map(contact => contact.name);
-      if (namesArray.includes(data.name)) {
-        const alert = window.confirm(
-          `${data.name} is already in Phonebook. Do you want to add another number?`
-        );
-        if (!alert) {
-          return;
-        } else {
-          this.setState(prevState => ({
-            contacts: [...prevState.contacts, contact],
-          }));
-        }
-      } else {
-        this.setState(prevState => ({
-          contacts: [...prevState.contacts, contact],
-        }));
-      }
+      this.setState(prevState => ({
+        contacts: [...prevState.contacts, contact],
+      }));
     }
   };
 
@@ -78,9 +76,7 @@ class App extends React.Component {
   getFilteredContacts = () => {
     const { contacts, filter } = this.state;
     const normalizedFilter = filter.toLowerCase();
-    return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(normalizedFilter)
-    );
+    return contacts.filter(contact => contact.name.toLowerCase().includes(normalizedFilter));
   };
 
   deleteContact = contactId => {
@@ -90,18 +86,39 @@ class App extends React.Component {
   };
 
   render() {
-    const { filter } = this.state;
+    const { filter, repeatingName, contacts } = this.state;
     const filteredContacts = this.getFilteredContacts();
     return (
       <>
-        <h1>Phonebook</h1>
+        <CSSTransition
+          in={repeatingName}
+          timeout={250}
+          classNames={{
+            enter: styles.errorEnter,
+            enterActive: styles.errorEnterActive,
+            exit: styles.errorExit,
+            exitActive: styles.errorExitActive,
+          }}
+          unmountOnExit
+        >
+          <Error name={repeatingName} />
+        </CSSTransition>
+
+        <CSSTransition in={true} appear={true} timeout={500} classNames={styles} unmountOnExit>
+          <Logo />
+        </CSSTransition>
+
         <Form onSubmit={this.addContact} />
-        <h2>Contacts</h2>
-        <Filter value={filter} onChange={this.filterContacts} />
-        <ContactsList
-          contacts={filteredContacts}
-          onDeleteContact={this.deleteContact}
-        />
+
+        <CSSTransition in={contacts.length > 0} timeout={250} classNames={styles} unmountOnExit>
+          <h2 className={styles.subtitle}>Contacts</h2>
+        </CSSTransition>
+
+        <CSSTransition in={contacts.length > 1} timeout={250} classNames={styles} unmountOnExit>
+          <Filter value={filter} onChange={this.filterContacts} />
+        </CSSTransition>
+
+        <ContactsList contacts={filteredContacts} onDeleteContact={this.deleteContact} />
       </>
     );
   }
