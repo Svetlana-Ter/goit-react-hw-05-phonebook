@@ -83,6 +83,11 @@ class App extends React.Component {
     this.setState(prevState => ({
       contacts: prevState.contacts.filter(contact => contact.id !== contactId),
     }));
+    if (this.state.filter) {
+      this.setState({
+        filter: '',
+      });
+    }
   };
 
   render() {
